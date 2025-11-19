@@ -19,6 +19,9 @@ app.add_middleware(
 
 engine = RAGEngine()
 
+docs = load_documents(settings.data_dir)
+print(f"Testing: can read data => {len(docs)}")
+
 @app.get("/api/health")
 def health():
     return {"status": "ok"}

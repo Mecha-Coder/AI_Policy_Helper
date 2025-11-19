@@ -10,6 +10,6 @@ class Settings(BaseModel):
     collection_name: str = os.getenv("COLLECTION_NAME", "policy_helper")
     chunk_size: int = int(os.getenv("CHUNK_SIZE", "700"))
     chunk_overlap: int = int(os.getenv("CHUNK_OVERLAP", "80"))
-    data_dir: str = os.getenv("DATA_DIR", "/app/data")
+    data_dir: str = os.getenv("DATA_DIR", "../data")
 
 settings = Settings()
