@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from typing import List
+
 from .models import IngestResponse, AskRequest, AskResponse, MetricsResponse, Citation, Chunk
 from .settings import settings
 from .ingest import load_documents
@@ -18,9 +19,6 @@ app.add_middleware(
 )
 
 engine = RAGEngine()
-
-docs = load_documents(settings.data_dir)
-print(f"Testing: can read data => {len(docs)}")
 
 @app.get("/api/health")
 def health():
@@ -41,7 +39,16 @@ def ingest():
 @app.post("/api/ask", response_model=AskResponse)
 def ask(req: AskRequest):
     ctx = engine.retrieve(req.query, k=req.k or 4)
+
+    print(ctx)
+
     answer = engine.generate(req.query, ctx)
+
+    print("========QUERY======")
+    print(req.query)
+    print("========ANSWER======")
+    print(answer)
+
     citations = [Citation(title=c.get("title"), section=c.get("section")) for c in ctx]
     chunks = [Chunk(title=c.get("title"), section=c.get("section"), text=c.get("text")) for c in ctx]
     stats = engine.stats()

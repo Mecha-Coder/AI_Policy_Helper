@@ -4,6 +4,8 @@ import numpy as np
 from .settings import settings
 from .ingest import chunk_text, doc_hash
 from qdrant_client import QdrantClient, models as qm
+import uuid
+import httpx
 
 # ---- Simple local embedder (deterministic) ----
 def _tokenize(s: str) -> List[str]:
@@ -23,7 +25,8 @@ class LocalEmbedder:
         v = v / (np.linalg.norm(v) + 1e-9)
         return v
 
-# ---- Vector store abstraction ----
+# ---- Vector store abstraction ---
+
 class InMemoryStore:
     def __init__(self, dim: int = 384):
         self.dim = dim
@@ -51,9 +54,10 @@ class InMemoryStore:
         idx = np.argsort(-sims)[:k]
         return [(float(sims[i]), self.meta[i]) for i in idx]
 
+
 class QdrantStore:
     def __init__(self, collection: str, dim: int = 384):
-        self.client = QdrantClient(url="http://qdrant:6333", timeout=10.0)
+        self.client = QdrantClient(url="http://localhost:6333", timeout=10.0)
         self.collection = collection
         self.dim = dim
         self._ensure_collection()
@@ -97,6 +101,29 @@ class StubLLM:
         joined = " ".join([c.get("text", "") for c in contexts])
         lines.append(joined[:600] + ("..." if len(joined) > 600 else ""))
         return "\n".join(lines)
+
+class OllamaLLM:
+    def __init__(self, host: str, LLM: str):
+        self.host = host
+        self.model = LLM # You can change this to any model you have pulled
+
+    def generate(self, query: str, contexts: List[Dict]) -> str:
+        prompt = f"You are a helpful company policy assistant. Cite sources by title and section when relevant.\nQuestion: {query}\nSources:\n"
+        for c in contexts:
+            prompt += f"- {c.get('title')} | {c.get('section')}\n{c.get('text')[:600]}\n---\n"
+        prompt += "Write a concise, accurate answer grounded in the sources. If unsure, say so."
+        data = {
+            "model": self.model,
+            "prompt": prompt,
+            "stream": False
+        }
+        try:
+            response = httpx.post(f"{self.host}/api/generate", json=data, timeout=60.0)
+            response.raise_for_status()
+            result = response.json()
+            return result.get("response", "").strip()
+        except Exception as e:
+            return f"Error generating answer with Ollama: {e}"
 
 class OpenAILLM:
     def __init__(self, api_key: str):
@@ -147,15 +174,19 @@ class RAGEngine:
         else:
             self.store = InMemoryStore(dim=384)
 
+
         # LLM selection
-        if settings.llm_provider == "openai" and settings.openai_api_key:
+        if settings.llm_provider == "ollama" and settings.ollama_host and settings.ollama_llm:
             try:
-                self.llm = OpenAILLM(api_key=settings.openai_api_key)
-                self.llm_name = "openai:gpt-4o-mini"
+                print("Using Ollama LLM at", settings.ollama_host)
+                self.llm = OllamaLLM(host=settings.ollama_host, LLM=settings.ollama_llm)
+                self.llm_name = f"ollama:{settings.ollama_llm}"
             except Exception:
+                print("Ollama LLM failed, falling back to StubLLM")
                 self.llm = StubLLM()
                 self.llm_name = "stub"
         else:
+            print("Defaulting to StubLLM")
             self.llm = StubLLM()
             self.llm_name = "stub"
 
@@ -172,7 +203,7 @@ class RAGEngine:
             text = ch["text"]
             h = doc_hash(text)
             meta = {
-                "id": h,
+                "id": str(uuid.uuid4()),
                 "hash": h,
                 "title": ch["title"],
                 "section": ch.get("section"),
@@ -192,7 +223,10 @@ class RAGEngine:
         qv = self.embedder.embed(query)
         results = self.store.search(qv, k=k)
         self.metrics.add_retrieval((time.time()-t0)*1000.0)
-        return [meta for score, meta in results]
+        return [
+            {**meta, "relevance_score": float(score)} 
+            for score, meta in results
+        ]
 
     def generate(self, query: str, contexts: List[Dict]) -> str:
         t0 = time.time()
