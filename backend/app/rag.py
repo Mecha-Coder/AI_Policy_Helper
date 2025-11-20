@@ -81,8 +81,8 @@ class InMemoryStore:
         return [(float(sims[i]), self.meta[i]) for i in idx]
 
 class QdrantStore:
-    def __init__(self, collection: str, dim: int):
-        self.client = QdrantClient(url="http://localhost:6333", timeout=10.0)
+    def __init__(self, collection: str, dim: int, host: str):
+        self.client = QdrantClient(url=host, timeout=10.0)
         self.collection = collection
         self.dim = dim
         self._ensure_collection()
@@ -133,30 +133,29 @@ class OllamaLLM:
         self.model = LLM # You can change this to any model you have pulled
 
     def generate(self, query: str, contexts: List[Dict]) -> str:
-        prompt = (
-            "You are a helpful company policy assistant. "
-            "Answer the question using ONLY the provided sources below. "
-            "Cite sources by title and section when relevant.\n"
-            f"Question: {query}\n"
-            "Sources:\n"
-        )
-        for i, c in enumerate(contexts):
+        prompt = "You are a company agent. Reply to the client's query based ONLY on the sources provided below. If the answer cannot be found in any sources, state that clearly\n"
+        prompt += """Answer format:
+- 1–2 sentence direct answer.
+- If relevant, cite exactly one source on a new line: Document: <DocumentName>, Section: <SectionName>. 
+- No extra text.\n\n"""
+        prompt += f"Client's Query: {query}\n"
+
+        for i, c in enumerate(contexts, 1):
             prompt += (
-                f"Source {i+1}:\n"
-                f"Title: {c.get('title')}\n"
-                f"Section: {c.get('section')}\n"
-                f"Content:\n{c.get('text')[:800]}\n"
-                "-----\n"
+                f"\n[SOURCE {i}]\n"
+                f"Document: {c.get('title', 'Unknown')}\n"
+                f"Section: {c.get('section', 'N/A')}\n"
+                f"Content:\n{c.get('text', '')}\n"
+                f"{'='*50}\n"
             )
-        prompt += (
-            "Write a concise, accurate answer grounded in the sources above. "
-            "If the answer is not in the sources, say 'I could not find relevant information in the provided sources.'"
-        )
         data = {
             "model": self.model,
             "prompt": prompt,
+            "temperature": 0.0,
+            "top_p": 0.1,
             "stream": False
         }
+
         try:
             response = httpx.post(f"{self.host}/api/generate", json=data, timeout=60.0)
             response.raise_for_status()
@@ -221,9 +220,10 @@ class RAGEngine:
         
         # --- Vector store selection ---
         embed_dim = 768 if settings.ollama_embed == "nomic-embed-text" else 384
-        if settings.vector_store == "qdrant":
+        
+        if settings.vector_store == "qdrant" and settings.store_host:
             try:
-                self.store = QdrantStore(collection=settings.collection_name, dim=embed_dim)
+                self.store = QdrantStore(collection=settings.collection_name, dim=embed_dim, host=settings.store_host)
             except Exception:
                 self.store = InMemoryStore(dim=embed_dim)
         else:
@@ -273,15 +273,19 @@ class RAGEngine:
         self.store.upsert(vectors, metas)
         return (len(self._doc_titles) - len(doc_titles_before), len(metas))
 
-    def retrieve(self, query: str, k: int = 4) -> List[Dict]:
+    def retrieve(self, query: str, k: int) -> List[Dict]:
         t0 = time.time()
         qv = self.embedder.embed(query)
-        results = self.store.search(qv, k=k)
+        results = self.store.search(qv, k)
         self.metrics.add_retrieval((time.time()-t0)*1000.0)
-        return [
-            {**meta, "relevance_score": float(score)} 
-            for score, meta in results
-        ]
+
+        filtered_results = sorted(
+            [item for item in results if item[0] >= 0.4],
+            key=lambda x: x[0],
+            reverse=True
+        )
+
+        return [meta for score, meta in filtered_results]
 
     def generate(self, query: str, contexts: List[Dict]) -> str:
         t0 = time.time()

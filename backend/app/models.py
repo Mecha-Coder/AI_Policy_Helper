@@ -7,7 +7,7 @@ class IngestResponse(BaseModel):
 
 class AskRequest(BaseModel):
     query: str
-    k: int | None = 4
+    k: int | None = None
 
 class Citation(BaseModel):
     title: str
