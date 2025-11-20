@@ -25,6 +25,32 @@ class LocalEmbedder:
         v = v / (np.linalg.norm(v) + 1e-9)
         return v
 
+# ---- Ollama semantic embedder ----
+class OllamaEmbedder:
+    def __init__(self, host: str, model: str):
+        self.host = host
+        self.model = model
+
+    def embed(self, text: str) -> np.ndarray:
+        data = {
+            "model": self.model,
+            "prompt": text
+        }
+        try:
+            response = httpx.post(f"{self.host}/api/embeddings", json=data, timeout=60.0)
+            response.raise_for_status()
+            result = response.json()
+            # Ollama returns {"embedding": [float, ...]}
+            emb = result.get("embedding", [])
+            v = np.array(emb, dtype="float32")
+            # L2 normalize
+            v = v / (np.linalg.norm(v) + 1e-9)
+            return v
+        except Exception as e:
+            print(f"Error getting embedding from Ollama: {e}")
+            # Fallback: return zeros
+            return np.zeros(4096, dtype="float32")
+
 # ---- Vector store abstraction ---
 
 class InMemoryStore:
@@ -54,9 +80,8 @@ class InMemoryStore:
         idx = np.argsort(-sims)[:k]
         return [(float(sims[i]), self.meta[i]) for i in idx]
 
-
 class QdrantStore:
-    def __init__(self, collection: str, dim: int = 384):
+    def __init__(self, collection: str, dim: int):
         self.client = QdrantClient(url="http://localhost:6333", timeout=10.0)
         self.collection = collection
         self.dim = dim
@@ -108,10 +133,25 @@ class OllamaLLM:
         self.model = LLM # You can change this to any model you have pulled
 
     def generate(self, query: str, contexts: List[Dict]) -> str:
-        prompt = f"You are a helpful company policy assistant. Cite sources by title and section when relevant.\nQuestion: {query}\nSources:\n"
-        for c in contexts:
-            prompt += f"- {c.get('title')} | {c.get('section')}\n{c.get('text')[:600]}\n---\n"
-        prompt += "Write a concise, accurate answer grounded in the sources. If unsure, say so."
+        prompt = (
+            "You are a helpful company policy assistant. "
+            "Answer the question using ONLY the provided sources below. "
+            "Cite sources by title and section when relevant.\n"
+            f"Question: {query}\n"
+            "Sources:\n"
+        )
+        for i, c in enumerate(contexts):
+            prompt += (
+                f"Source {i+1}:\n"
+                f"Title: {c.get('title')}\n"
+                f"Section: {c.get('section')}\n"
+                f"Content:\n{c.get('text')[:800]}\n"
+                "-----\n"
+            )
+        prompt += (
+            "Write a concise, accurate answer grounded in the sources above. "
+            "If the answer is not in the sources, say 'I could not find relevant information in the provided sources.'"
+        )
         data = {
             "model": self.model,
             "prompt": prompt,
@@ -163,19 +203,34 @@ class Metrics:
         }
 
 class RAGEngine:
-    def __init__(self):
-        self.embedder = LocalEmbedder(dim=384)
-        # Vector store selection
+    def __init__(self):        
+        # --- Embedder selection ---
+        if settings.ollama_embed == "nomic-embed-text" and settings.ollama_host:
+            try:
+                print("Using Ollama Embedder at", settings.ollama_host)
+                self.embedder = OllamaEmbedder(host=settings.ollama_host, model=settings.ollama_embed)
+                self.embedder_name = f"ollama:{settings.ollama_embed}"
+            except Exception:
+                print("Ollama Embedder failed, falling back to LocalEmbedder")
+                self.embedder = LocalEmbedder(dim=384)
+                self.embedder_name = "local-384"
+        else:
+            print("Using LocalEmbedder")
+            self.embedder = LocalEmbedder(dim=384)
+            self.embedder_name = "local-384"    
+        
+        # --- Vector store selection ---
+        embed_dim = 768 if settings.ollama_embed == "nomic-embed-text" else 384
         if settings.vector_store == "qdrant":
             try:
-                self.store = QdrantStore(collection=settings.collection_name, dim=384)
+                self.store = QdrantStore(collection=settings.collection_name, dim=embed_dim)
             except Exception:
-                self.store = InMemoryStore(dim=384)
+                self.store = InMemoryStore(dim=embed_dim)
         else:
-            self.store = InMemoryStore(dim=384)
+            self.store = InMemoryStore(dim=embed_dim)
 
 
-        # LLM selection
+        # --- LLM selection ---
         if settings.llm_provider == "ollama" and settings.ollama_host and settings.ollama_llm:
             try:
                 print("Using Ollama LLM at", settings.ollama_host)
@@ -239,7 +294,7 @@ class RAGEngine:
         return {
             "total_docs": len(self._doc_titles),
             "total_chunks": self._chunk_count,
-            "embedding_model": settings.embedding_model,
+            "embedding_model": self.embedder_name,
             "llm_model": self.llm_name,
             **m
         }

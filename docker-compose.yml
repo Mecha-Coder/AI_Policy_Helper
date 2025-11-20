@@ -22,7 +22,8 @@ services:
     volumes:
       - ollama_data:/root/.ollama
     environment:
-      - MODEL_NAME=llama3.2:3b
+      - OLLAMA_LLM=llama3.2:3b
+      - OLLAMA_EMBED=nomic-embed-text
       - NVIDIA_VISIBLE_DEVICES=all
     restart: unless-stopped
     runtime: nvidia
@@ -36,8 +37,8 @@ services:
       - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
       - VECTOR_STORE=${VECTOR_STORE:-qdrant}
       - COLLECTION_NAME=${COLLECTION_NAME:-policy_helper}
-      - CHUNK_SIZE=${CHUNK_SIZE:-700}
-      - CHUNK_OVERLAP=${CHUNK_OVERLAP:-80}
+      - CHUNK_SIZE=${CHUNK_SIZE:-50}
+      - CHUNK_OVERLAP=${CHUNK_OVERLAP:-10}
       - DATA_DIR=${DATA_DIR}
     volumes:
       - ./data:/app/data:ro
