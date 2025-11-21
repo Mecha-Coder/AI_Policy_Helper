@@ -1,6 +1,34 @@
 
-### **🚀 Next Features to Ship**
+### **⚙️ How to Setup**
 
+**1. Clone repo:**
+
+```bash
+git clone https://github.com/Mecha-Coder/AI_Policy_Helper.git
+cd AI_Policy_Helper
+```
+
+**2. Start container:**
+
+- `make online` online mode - (Uses qwen2.5:3b LLM and nomic-embed) 
+- `make offline` offline mode - (Falls back to Stud MML and LocalEmbedder)
+
+**3. Stop container:**
+
+`Crtl + C`
+
+
+**4. Clear everything:**
+
+`make clean`
+
+**Note:** Always run `make clean` before switching modes to avoid conflicts.
+
+---
+
+### **🏛️ Architecture**
+
+![Architecture](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/architecture.png)
 
 ---
 
