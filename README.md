@@ -6,7 +6,7 @@
 
 ![Architecture](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/UI_screenshot.png)
 
-### **⚙️ Demo**
+### **🎬 Demo**
 
 `Online mode` ➡️ https://drive.google.com/file/d/13nk34O8dRcfyq-tvfJ67qYyqBJA6eknU/view?usp=drive_link
 `Offline mode` ➡️ https://drive.google.com/file/d/19sH6QjDcPeX66DNw8_XZ5D_DcllslR4M/view?usp=drive_link
