@@ -12,7 +12,7 @@ def _tokenize(s: str) -> List[str]:
     return [t.lower() for t in s.split()]
 
 class LocalEmbedder:
-    def __init__(self, dim: int = 384):
+    def __init__(self, dim: int ):
         self.dim = dim
 
     def embed(self, text: str) -> np.ndarray:
@@ -54,7 +54,7 @@ class OllamaEmbedder:
 # ---- Vector store abstraction ---
 
 class InMemoryStore:
-    def __init__(self, dim: int = 384):
+    def __init__(self, dim: int ):
         self.dim = dim
         self.vecs: List[np.ndarray] = []
         self.meta: List[Dict] = []
@@ -219,14 +219,17 @@ class RAGEngine:
             self.embedder_name = "local-384"    
         
         # --- Vector store selection ---
-        embed_dim = 768 if settings.ollama_embed == "nomic-embed-text" else 384
+        embed_dim = 384 if self.embedder_name == "local-384" else 768
         
         if settings.vector_store == "qdrant" and settings.store_host:
             try:
+                print("Using Qdrant Vector Store")
                 self.store = QdrantStore(collection=settings.collection_name, dim=embed_dim, host=settings.store_host)
             except Exception:
+                print("Qdrant connection failed, falling back to InMemoryStore")
                 self.store = InMemoryStore(dim=embed_dim)
         else:
+            print("Qdrant connection failed, falling back to InMemoryStore")
             self.store = InMemoryStore(dim=embed_dim)
 
 
@@ -279,11 +282,14 @@ class RAGEngine:
         results = self.store.search(qv, k)
         self.metrics.add_retrieval((time.time()-t0)*1000.0)
 
-        filtered_results = sorted(
-            [item for item in results if item[0] >= 0.4],
-            key=lambda x: x[0],
-            reverse=True
-        )
+        if self.embedder_name != "local-384":
+            filtered_results = sorted(
+                [item for item in results if item[0] >= 0.4],
+                key=lambda x: x[0],
+                reverse=True
+            )
+        else:
+            filtered_results = results
 
         return [meta for score, meta in filtered_results]
 

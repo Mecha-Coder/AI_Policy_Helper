@@ -31,6 +31,15 @@ export default function AdminPanel() {
     React.useEffect(() => {
         getHealth();
         refresh();
+
+        // Set up interval to run every 5 seconds
+        const interval = setInterval(() => {
+            getHealth();
+            refresh();
+        }, 5000); // 5000ms = 5 seconds
+
+        // Cleanup function to clear interval when component unmounts
+        return () => clearInterval(interval);
     }, []);
 
     return (

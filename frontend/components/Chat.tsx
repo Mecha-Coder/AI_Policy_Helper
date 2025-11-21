@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { apiAsk } from "@/lib/api";
+import { useRef, useEffect } from "react";
 
 type Message = {
     role: "user" | "assistant";
@@ -13,6 +14,12 @@ export default function Chat() {
     const [messages, setMessages] = React.useState<Message[]>([]);
     const [q, setQ] = React.useState("");
     const [loading, setLoading] = React.useState(false);
+
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
 
     const send = async () => {
         if (!q.trim()) return;
@@ -92,6 +99,7 @@ export default function Chat() {
                         )}
                     </div>
                 ))}
+                <div ref={messagesEndRef} />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">

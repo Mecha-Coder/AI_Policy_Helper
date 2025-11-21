@@ -41,6 +41,11 @@ services:
             - .env
         volumes:
             - ./data:/app/data:ro
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+            interval: 15s
+            timeout: 4s
+            retries: 50
         depends_on:
             qdrant:
                 condition: service_healthy
@@ -54,4 +59,5 @@ services:
         ports:
             - "3000:3000"
         depends_on:
-            - backend
+            backend:
+                condition: service_started

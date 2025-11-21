@@ -1,6 +1,10 @@
-.PHONY: dev test fmt
+.PHONY: dev down test fmt
+
 dev:
 	docker compose up --build
+
+clean:
+	docker-compose down --rmi all -v
 
 test:
 	docker compose run --rm backend pytest -q
