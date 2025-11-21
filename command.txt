@@ -1,4 +1,0 @@
-docker-compose down --rmi all -v
-docker-compose up qdrant ollama backend
-docker volume prune
-docker volume rm ai-policy_helper_ollama_data ai-policy_helper_qdrant_data

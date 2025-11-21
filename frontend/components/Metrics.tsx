@@ -8,10 +8,6 @@ export default function Info({
     metrics: any;
     health: any;
 }) {
-    console.log("Metrics component render");
-    console.log(metrics);
-    console.log("Health status:");
-    console.log(health);
     return (
         <div className="border-t border-gray-200 pt-4">
             <h3 className="text-lg font-medium text-gray-700 mb-3">Metrics</h3>

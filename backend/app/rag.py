@@ -7,6 +7,8 @@ from qdrant_client import QdrantClient, models as qm
 import uuid
 import httpx
 
+# ==================== EMBEDDING PROVIDERS =========================
+
 # ---- Simple local embedder (deterministic) ----
 def _tokenize(s: str) -> List[str]:
     return [t.lower() for t in s.split()]
@@ -25,6 +27,7 @@ class LocalEmbedder:
         v = v / (np.linalg.norm(v) + 1e-9)
         return v
 
+
 # ---- Ollama semantic embedder ----
 class OllamaEmbedder:
     def __init__(self, host: str, model: str):
@@ -40,19 +43,19 @@ class OllamaEmbedder:
             response = httpx.post(f"{self.host}/api/embeddings", json=data, timeout=60.0)
             response.raise_for_status()
             result = response.json()
-            # Ollama returns {"embedding": [float, ...]}
             emb = result.get("embedding", [])
             v = np.array(emb, dtype="float32")
-            # L2 normalize
             v = v / (np.linalg.norm(v) + 1e-9)
             return v
         except Exception as e:
-            print(f"Error getting embedding from Ollama: {e}")
             # Fallback: return zeros
+            print(f"Error getting embedding from Ollama: {e}")
             return np.zeros(4096, dtype="float32")
 
-# ---- Vector store abstraction ---
 
+# ==================== VECTOR STORES =============================
+
+# ---- In-memory vector store ----
 class InMemoryStore:
     def __init__(self, dim: int ):
         self.dim = dim
@@ -80,6 +83,8 @@ class InMemoryStore:
         idx = np.argsort(-sims)[:k]
         return [(float(sims[i]), self.meta[i]) for i in idx]
 
+
+# ---- Qdrant vector store ----
 class QdrantStore:
     def __init__(self, collection: str, dim: int, host: str):
         self.client = QdrantClient(url=host, timeout=10.0)
@@ -114,7 +119,10 @@ class QdrantStore:
             out.append((float(r.score), dict(r.payload)))
         return out
 
-# ---- LLM provider ----
+
+# ==================== LLM PROVIDERS =============================
+
+# ---- Stub LLM (for Offline) ----
 class StubLLM:
     def generate(self, query: str, contexts: List[Dict]) -> str:
         lines = [f"Answer (stub): Based on the following sources:"]
@@ -127,10 +135,11 @@ class StubLLM:
         lines.append(joined[:600] + ("..." if len(joined) > 600 else ""))
         return "\n".join(lines)
 
+# ---- Ollama LLM (for Online) ----
 class OllamaLLM:
     def __init__(self, host: str, LLM: str):
         self.host = host
-        self.model = LLM # You can change this to any model you have pulled
+        self.model = LLM
 
     def generate(self, query: str, contexts: List[Dict]) -> str:
         prompt = "You are an agent who understands the company's products and policies. Study the provided sources and respond to the client's inquiry. "
@@ -150,8 +159,6 @@ class OllamaLLM:
         data = {
             "model": self.model,
             "prompt": prompt,
-            # "temperature": 0.0,
-            # "top_p": 0.1,
             "stream": False
         }
         print("========= See Prompt =========")
@@ -164,6 +171,7 @@ class OllamaLLM:
         except Exception as e:
             return f"Error generating answer with Ollama: {e}"
 
+# ---- OpenAI LLM (API Key not working) ----
 class OpenAILLM:
     def __init__(self, api_key: str):
         from openai import OpenAI
@@ -181,7 +189,8 @@ class OpenAILLM:
         )
         return resp.choices[0].message.content
 
-# ---- RAG Orchestrator & Metrics ----
+# ==================== ORCHESTRATION AND METRICS =============================
+
 class Metrics:
     def __init__(self):
         self.t_retrieval = []
@@ -201,8 +210,10 @@ class Metrics:
             "avg_generation_latency_ms": round(avg_g, 2),
         }
 
+
 class RAGEngine:
-    def __init__(self):        
+    def __init__(self):
+
         # --- Embedder selection ---
         if settings.ollama_embed == "nomic-embed-text" and settings.ollama_host:
             try:
@@ -252,6 +263,7 @@ class RAGEngine:
         self._doc_titles = set()
         self._chunk_count = 0
 
+
     def ingest_chunks(self, chunks: List[Dict]) -> Tuple[int, int]:
         vectors = []
         metas = []
@@ -282,6 +294,8 @@ class RAGEngine:
         results = self.store.search(qv, k)
         self.metrics.add_retrieval((time.time()-t0)*1000.0)
 
+        # Filter results based on score threshold (> 0.4)
+        # Skip filtering for local embedder
         if self.embedder_name != "local-384":
             filtered_results = sorted(
                 [item for item in results if item[0] >= 0.4],
@@ -309,7 +323,8 @@ class RAGEngine:
             **m
         }
 
-# ---- Helpers ----
+# ========================== UTILITIES =============================
+
 def build_chunks_from_docs(docs: List[Dict], chunk_size: int, overlap: int) -> List[Dict]:
     out = []
     for d in docs:
