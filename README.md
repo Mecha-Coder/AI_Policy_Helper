@@ -1,5 +1,10 @@
-### **⚖️ Trade-offs**
 
+### **🚀 Next Features to Ship**
+
+
+---
+
+### **⚖️ Trade-offs**
 
 <details>
 <summary><strong>1. LLM: Ollama vs OpenAI</strong></summary>
