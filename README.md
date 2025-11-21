@@ -4,6 +4,14 @@
 
 </div>
 
+![Architecture](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/UI_screenshot.png)
+
+### **⚙️ Demo**
+
+`Online mode` ➡️ https://drive.google.com/file/d/13nk34O8dRcfyq-tvfJ67qYyqBJA6eknU/view?usp=drive_link
+`Offline mode` ➡️ https://drive.google.com/file/d/19sH6QjDcPeX66DNw8_XZ5D_DcllslR4M/view?usp=drive_link
+
+---
 
 ### **⚙️ How to Setup**
 
@@ -18,6 +26,14 @@ cd AI_Policy_Helper
 
 - `make online` online mode - (Uses qwen2.5:3b LLM and nomic-embed) 
 - `make offline` offline mode - (Falls back to Stud MML and LocalEmbedder)
+
+FOR ONLINE MODE: THE SETUP WILL TAKE 5 MINS
+
+**Verify setup completion**
+
+![Service_1](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/service_1.png)
+![Service_2](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/service_2.png)
+![Service_3](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/service_3.png)
 
 **3. Stop container:**
 
