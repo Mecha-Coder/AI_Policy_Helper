@@ -8,7 +8,7 @@
 
 ### **🎬 Demo**
 
-`Online mode` ➡️ https://drive.google.com/file/d/13nk34O8dRcfyq-tvfJ67qYyqBJA6eknU/view?usp=drive_link
+`Online mode` ➡️ https://drive.google.com/file/d/13nk34O8dRcfyq-tvfJ67qYyqBJA6eknU/view?usp=drive_link<br>
 `Offline mode` ➡️ https://drive.google.com/file/d/19sH6QjDcPeX66DNw8_XZ5D_DcllslR4M/view?usp=drive_link
 
 ---
@@ -18,7 +18,7 @@
 **1. Clone repo:**
 
 ```bash
-git clone https://github.com/Mecha-Coder/AI_Policy_Helper.git
+git clone https://github.com/Mecha-Coder/AI_Policy_Helper.git 
 cd AI_Policy_Helper
 ```
 
