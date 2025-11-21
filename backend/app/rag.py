@@ -133,12 +133,11 @@ class OllamaLLM:
         self.model = LLM # You can change this to any model you have pulled
 
     def generate(self, query: str, contexts: List[Dict]) -> str:
-        prompt = "You are a company agent. Reply to the client's query based ONLY on the sources provided below. If the answer cannot be found in any sources, state that clearly\n"
-        prompt += """Answer format:
-- 1–2 sentence direct answer.
-- If relevant, cite exactly one source on a new line: Document: <DocumentName>, Section: <SectionName>. 
-- No extra text.\n\n"""
-        prompt += f"Client's Query: {query}\n"
+        prompt = "You are an agent who understands the company's products and policies. Study the provided sources and respond to the client's inquiry. "
+        prompt += "Provide a direct answer in 1-2 sentences without any additional text."
+        prompt += "Do not fabricate information. If there is no answer found in the sources, state that explicitly. \n"
+
+        prompt += f"\nClient's Inquiry: {query}\n"
 
         for i, c in enumerate(contexts, 1):
             prompt += (
@@ -155,7 +154,8 @@ class OllamaLLM:
             "top_p": 0.1,
             "stream": False
         }
-
+        print("========= See Prompt =========")
+        print(prompt)
         try:
             response = httpx.post(f"{self.host}/api/generate", json=data, timeout=60.0)
             response.raise_for_status()

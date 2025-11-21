@@ -3,7 +3,6 @@ volumes:
     ollama_data:
 
 services:
-    
     qdrant:
         build: ./qdrant
         ports:
@@ -18,7 +17,6 @@ services:
             - .env
         volumes:
             - qdrant_data:/qdrant/storage
-    
 
     ollama:
         build: ./ollama
@@ -28,7 +26,11 @@ services:
             - .env
         volumes:
             - ollama_data:/root/.ollama
-        restart: unless-stopped
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:11434/v1/models"]
+            interval: 15s
+            timeout: 4s
+            retries: 50
         runtime: nvidia
 
     backend:
@@ -53,5 +55,3 @@ services:
             - "3000:3000"
         depends_on:
             - backend
-
-

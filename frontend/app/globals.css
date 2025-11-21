@@ -1,5 +1,10 @@
-html, body { margin: 0; padding: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
-input, button, textarea { font-family: inherit; }
-.code { background: #f6f8fa; padding: 12px; border-radius: 8px; }
-.card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-.badge { background: #eef2ff; padding: 2px 8px; border-radius: 999px; margin-right: 6px; font-size: 12px; }
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.button-primary {
+    @apply px-4 py-2 bg-blue-700 rounded-lg text-white font-semibold  hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}
+.button-secondary {
+    @apply px-4 py-2 bg-red-500 rounded-lg text-white font-semibold hover:bg-red-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}

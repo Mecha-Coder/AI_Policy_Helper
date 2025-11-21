@@ -1,66 +1,91 @@
-'use client';
-import React from 'react';
-import { apiAsk } from '@/lib/api';
+"use client";
+import React from "react";
+import { apiAsk } from "@/lib/api";
 
-type Message = { role: 'user' | 'assistant', content: string, citations?: {title:string, section?:string}[], chunks?: {title:string, section?:string, text:string}[] };
+type Message = {
+    role: "user" | "assistant";
+    content: string;
+    citations?: { title: string; section?: string }[];
+    chunks?: { title: string; section?: string; text: string }[];
+};
 
 export default function Chat() {
-  const [messages, setMessages] = React.useState<Message[]>([]);
-  const [q, setQ] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
+    const [messages, setMessages] = React.useState<Message[]>([]);
+    const [q, setQ] = React.useState("");
+    const [loading, setLoading] = React.useState(false);
 
-  const send = async () => {
-    if (!q.trim()) return;
-    const my = { role: 'user' as const, content: q };
-    setMessages(m => [...m, my]);
-    setLoading(true);
-    try {
-      const res = await apiAsk(q);
-      const ai: Message = { role: 'assistant', content: res.answer, citations: res.citations, chunks: res.chunks };
-      setMessages(m => [...m, ai]);
-    } catch (e:any) {
-      setMessages(m => [...m, { role: 'assistant', content: 'Error: ' + e.message }]);
-    } finally {
-      setLoading(false);
-      setQ('');
-    }
-  };
+    const send = async () => {
+        if (!q.trim()) return;
+        const my = { role: "user" as const, content: q };
+        setMessages((m) => [...m, my]);
+        setLoading(true);
+        try {
+            const res = await apiAsk(q);
+            const ai: Message = {
+                role: "assistant",
+                content: res.answer,
+                citations: res.citations,
+                chunks: res.chunks,
+            };
+            setMessages((m) => [...m, ai]);
+        } catch (e: any) {
+            setMessages((m) => [
+                ...m,
+                { role: "assistant", content: "Error: " + e.message },
+            ]);
+        } finally {
+            setLoading(false);
+            setQ("");
+        }
+    };
 
-  return (
-    <div className="card">
-      <h2>Chat</h2>
-      <div style={{maxHeight: 320, overflowY:'auto', padding: 8, border:'1px solid #eee', borderRadius: 8, marginBottom: 12}}>
-        {messages.map((m, i) => (
-          <div key={i} style={{margin: '8px 0'}}>
-            <div style={{fontSize:12, color:'#666'}}>{m.role === 'user' ? 'You' : 'Assistant'}</div>
-            <div>{m.content}</div>
-            {m.citations && m.citations.length>0 && (
-              <div style={{marginTop:6}}>
-                {m.citations.map((c, idx) => (
-                  <span key={idx} className="badge" title={c.section || ''}>{c.title}</span>
+    return (
+        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Chat</h2>
+
+            <div className="h-96 overflow-y-auto border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50">
+                {messages.map((m, i) => (
+                    <div key={i} className="mb-4 last:mb-0">
+                        <div className="text-sm font-medium text-gray-500 mb-1">
+                            {m.role === "user" ? "You" : "Assistant"}
+                        </div>
+                        <div className="text-gray-700">{m.content}</div>
+                        {m.citations && m.citations.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {m.citations.map((c, idx) => (
+                                    <span
+                                        key={idx}
+                                        className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded border border-blue-200"
+                                        title={c.section || ""}
+                                    >
+                                        {c.title}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 ))}
-              </div>
-            )}
-            {m.chunks && m.chunks.length>0 && (
-              <details style={{marginTop:6}}>
-                <summary>View supporting chunks</summary>
-                {m.chunks.map((c, idx) => (
-                  <div key={idx} className="card">
-                    <div style={{fontWeight:600}}>{c.title}{c.section ? ' — ' + c.section : ''}</div>
-                    <div style={{whiteSpace:'pre-wrap'}}>{c.text}</div>
-                  </div>
-                ))}
-              </details>
-            )}
-          </div>
-        ))}
-      </div>
-      <div style={{display:'flex', gap:8}}>
-        <input placeholder="Ask about policy or products..." value={q} onChange={e=>setQ(e.target.value)} style={{flex:1, padding:10, borderRadius:8, border:'1px solid #ddd'}} onKeyDown={(e)=>{ if(e.key==='Enter') send(); }}/>
-        <button onClick={send} disabled={loading} style={{padding:'10px 14px', borderRadius:8, border:'1px solid #111', background:'#111', color:'#fff'}}>
-          {loading ? 'Thinking...' : 'Send'}
-        </button>
-      </div>
-    </div>
-  );
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                    type="text"
+                    placeholder="Ask about policy or products..."
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") send();
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                />
+                <button
+                    onClick={send}
+                    disabled={loading}
+                    className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+                >
+                    {loading ? "Thinking..." : "Send"}
+                </button>
+            </div>
+        </div>
+    );
 }
