@@ -7,7 +7,7 @@ class Settings(BaseModel):
 
     ollama_host: str = os.getenv("OLLAMA_HOST", "http://localhost:11434")
     ollama_embed: str = os.getenv("OLLAMA_EMBED", "nomic-embed-text")
-    ollama_llm: str = os.getenv("OLLAMA_LLM", "llama3.2:3b")
+    ollama_llm: str = os.getenv("OLLAMA_LLM", "qwen2.5:3b-instruct-q4_K_M") #"llama3.2:3b"
     
     vector_store: str = os.getenv("VECTOR_STORE", "qdrant")  # qdrant | memory
     store_host: str = os.getenv("STORE_HOST", "http://localhost:6333")

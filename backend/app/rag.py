@@ -150,8 +150,8 @@ class OllamaLLM:
         data = {
             "model": self.model,
             "prompt": prompt,
-            "temperature": 0.0,
-            "top_p": 0.1,
+            # "temperature": 0.0,
+            # "top_p": 0.1,
             "stream": False
         }
         print("========= See Prompt =========")

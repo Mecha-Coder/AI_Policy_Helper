@@ -50,6 +50,7 @@ export default function Chat() {
                             {m.role === "user" ? "You" : "Assistant"}
                         </div>
                         <div className="text-gray-700">{m.content}</div>
+
                         {m.citations && m.citations.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-2">
                                 {m.citations.map((c, idx) => (
@@ -62,6 +63,32 @@ export default function Chat() {
                                     </span>
                                 ))}
                             </div>
+                        )}
+
+                        {m.chunks && m.chunks.length > 0 && (
+                            <details className="mt-3">
+                                <summary className="cursor-pointer text-sm text-gray-600 hover:text-gray-800 font-medium">
+                                    View supporting chunks
+                                </summary>
+                                <div className="mt-2 space-y-3">
+                                    {m.chunks.map((c, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="bg-white border border-gray-200 rounded-lg p-3 text-sm"
+                                        >
+                                            <div className="font-semibold text-gray-800 mb-1">
+                                                {c.title}
+                                                {c.section
+                                                    ? " — " + c.section
+                                                    : ""}
+                                            </div>
+                                            <div className="text-gray-600 whitespace-pre-wrap">
+                                                {c.text}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </details>
                         )}
                     </div>
                 ))}

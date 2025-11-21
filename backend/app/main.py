@@ -38,9 +38,18 @@ def ingest():
 
 @app.post("/api/ask", response_model=AskResponse)
 def ask(req: AskRequest):
-    ctx = engine.retrieve(req.query, k=req.k if req.k is not None else 3)
+    ctx = engine.retrieve(req.query, k=req.k if req.k is not None else 4)
     answer = engine.generate(req.query, ctx)
-    citations = [Citation(title=c.get("title"), section=c.get("section")) for c in ctx]
+
+    # Remove duplicate citations based on title
+    seen_titles = set()
+    citations = []
+    for c in ctx:
+        title = c.get("title")
+        if title not in seen_titles:
+            seen_titles.add(title)
+            citations.append(Citation(title=title, section=c.get("section")))
+    
     chunks = [Chunk(title=c.get("title"), section=c.get("section"), text=c.get("text")) for c in ctx]
     stats = engine.stats()
     return AskResponse(

@@ -3,7 +3,7 @@ import AdminPanel from "@/components/AdminPanel";
 
 export default function Page() {
     return (
-        <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-16">
+        <div className="min-h-screen bg-gray-100 pt-12 px-4 sm:px-6 lg:px-16">
             <div className="w-full mx-auto">
                 {/* Header */}
                 <div className="text-center mb-12">
@@ -32,7 +32,7 @@ export default function Page() {
                             <h3 className="text-xl font-semibold text-gray-800 mb-4">
                                 How to test
                             </h3>
-                            <ol className="list-decimal list-inside space-y-3 text-gray-700">
+                            <ol className="list-decimal list-inside text-gray-700">
                                 <li>
                                     Click <b>Ingest sample docs</b>.
                                 </li>
@@ -48,6 +48,16 @@ export default function Page() {
                                     <i>
                                         What's the shipping SLA to East Malaysia
                                         for bulky items?
+                                    </i>
+                                </li>
+                                <li>
+                                    Ask: <i>What couriers use for shipping?</i>
+                                </li>
+                                <li>
+                                    Ask:{" "}
+                                    <i>
+                                        What is the warranty period for
+                                        PowerBlend 100?
                                     </i>
                                 </li>
                             </ol>
