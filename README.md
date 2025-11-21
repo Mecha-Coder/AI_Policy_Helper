@@ -24,25 +24,31 @@ cd AI_Policy_Helper
 
 **2. Start container:**
 
-- `make online` online mode - (Uses qwen2.5:3b LLM and nomic-embed) 
-- `make offline` offline mode - (Falls back to Stud MML and LocalEmbedder)
+- `make online` ➡️ online mode ➡️ (Uses qwen2.5:3b LLM and nomic-embed) 
+- `make offline` ➡️ offline mode ➡️ (Falls back to Stud MML and LocalEmbedder)
 
-FOR ONLINE MODE: THE SETUP WILL TAKE 5 MINS
+⌛⌛ `FOR ONLINE MODE: THE SETUP WILL TAKE 5 MINS` ⌛⌛
 
-**Verify setup completion**
+<ins>**Verify setup completion**</ins>
 
 ![Service_1](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/service_1.png)
 ![Service_2](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/service_2.png)
 ![Service_3](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/service_3.png)
 
-**3. Stop container:**
+**3. Open browser and interact with the Admin & Chat Panel**
+```
+http://localhost:3000
+```
 
-`Crtl + C`
+**4. Stop container:**
+```
+Crtl + C
+```
 
-
-**4. Clear everything:**
-
-`make clean`
+**5. Clear everything:**
+```
+make clean
+```
 
 **Note:** Always run `make clean` before switching modes to avoid conflicts.
 
