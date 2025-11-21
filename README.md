@@ -1,3 +1,9 @@
+<div align="center">
+
+# 🤖 AI Policy & Product Helper  
+
+</div>
+
 
 ### **⚙️ How to Setup**
 
@@ -140,7 +146,7 @@ prompt += "Do not fabricate information. If no answer exists in sources, state t
 
 ---
 
-### **🚀 Next Features to Ship**
+### **🚀 What features to ship next**
 
 
 
