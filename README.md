@@ -24,29 +24,31 @@ RAG ensures AI answers are accurate, context-aware, and grounded in your company
 
 ---
 
+### **🏛️ Architecture**
+
+![Architecture](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/architecture.png)
+
+---
+
 ### **⚙️ How to Setup**
 
-🚨 Pre-requisites
 ```
+🚨 Pre-requisites
+
 # System: Linux distro or WSL
 # Docker installed
 ```
 
-<ins>**1. Clone repo:**</ins>
-
 ```bash
+# 1. Clone repo:
+
 git clone https://github.com/Mecha-Coder/AI_Policy_Helper.git 
 cd AI_Policy_Helper
-```
 
-<ins>**2. Start containers with make:**</ins>
-```bash
-# ONLINE MODE ➡️ (Uses qwen2.5:3b LLM and nomic-embed) 
-make online
-```
-```bash
-# OFFLINE MODE ➡️ (Falls back to Stud MML and LocalEmbedder)
-make offline
+# 2. Start containers with make:
+
+make online    # ONLINE MODE ➡️ (Uses qwen2.5:3b LLM and nomic-embed) 
+make offline   # OFFLINE MODE ➡️ (Falls back to Stud MML and LocalEmbedder)
 ```
 
 ⌛⌛ `FOR ONLINE MODE: THE SETUP WILL TAKE 5 MINS` ⌛⌛
@@ -57,28 +59,23 @@ make offline
 | Frontend | ![Service_2](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/service_2.png)
 | Ollama | ![Service_3](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/service_3.png)
 
-<ins>**3. Open browser and interact with the Admin & Chat Panel**</ins>
-```
-http://localhost:3000
-```
+```bash
+# 3. Open browser and interact with the Admin & Chat Panel
 
-<ins>**4. Stop container:**</ins>
-```
+http://localhost:3000
+
+# 4. Stop container:
+
 Crtl + C
 ```
 
-<ins>**5. Clear everything:**</ins>
-```
+
+```bash
+# 5. Clear everything:
+
 make clean
 ```
-
 **Note:** Always run `make clean` before switching modes to avoid conflicts.
-
----
-
-### **🏛️ Architecture**
-
-![Architecture](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/architecture.png)
 
 ---
 
