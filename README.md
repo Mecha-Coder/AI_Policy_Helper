@@ -4,7 +4,18 @@
 
 </div>
 
+This is a Retrieval-Augmented Generation (RAG) project that ingests company policies and product information. Users can ask questions and get AI-powered answers grounded in company data.
+
+<ins>**Why RAG?**</ins><br>
+LLMs are typically trained on public data and may lack context for private or company-specific information. RAG addresses this by:
+- Providing verifiable sources for relevant answers
+- Keeping responses up-to-date with internal data
+
+RAG ensures AI answers are accurate, context-aware, and grounded in your company knowledge.
+
 ![Architecture](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/UI_screenshot.png)
+
+---
 
 ### **🎬 Demo**
 
@@ -15,37 +26,48 @@
 
 ### **⚙️ How to Setup**
 
-**1. Clone repo:**
+🚨 Pre-requisites
+```
+# System: Linux distro or WSL
+# Docker installed
+```
+
+<ins>**1. Clone repo:**</ins>
 
 ```bash
 git clone https://github.com/Mecha-Coder/AI_Policy_Helper.git 
 cd AI_Policy_Helper
 ```
 
-**2. Start container:**
-
-- `make online` ➡️ online mode ➡️ (Uses qwen2.5:3b LLM and nomic-embed) 
-- `make offline` ➡️ offline mode ➡️ (Falls back to Stud MML and LocalEmbedder)
+<ins>**2. Start containers with make:**</ins>
+```bash
+# ONLINE MODE ➡️ (Uses qwen2.5:3b LLM and nomic-embed) 
+make online
+```
+```bash
+# OFFLINE MODE ➡️ (Falls back to Stud MML and LocalEmbedder)
+make offline
+```
 
 ⌛⌛ `FOR ONLINE MODE: THE SETUP WILL TAKE 5 MINS` ⌛⌛
 
-<ins>**Verify setup completion**</ins>
+| Service | Verify Setup Status |
+|---|---|
+| Backend | ![Service_1](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/service_1.png)
+| Frontend | ![Service_2](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/service_2.png)
+| Ollama | ![Service_3](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/service_3.png)
 
-![Service_1](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/service_1.png)
-![Service_2](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/service_2.png)
-![Service_3](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/service_3.png)
-
-**3. Open browser and interact with the Admin & Chat Panel**
+<ins>**3. Open browser and interact with the Admin & Chat Panel**</ins>
 ```
 http://localhost:3000
 ```
 
-**4. Stop container:**
+<ins>**4. Stop container:**</ins>
 ```
 Crtl + C
 ```
 
-**5. Clear everything:**
+<ins>**5. Clear everything:**</ins>
 ```
 make clean
 ```
