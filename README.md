@@ -26,7 +26,13 @@ RAG ensures AI answers are accurate, context-aware, and grounded in your company
 
 ### **🏛️ Architecture**
 
-![Architecture](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/architecture.png)
+<h3 align="center"><strong>System Design</strong></h3>
+
+![System Design](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/system%20design.png)
+
+<h3 align="center" style="font-size: 48px"><strong>Flow Chart</strong></h3>
+
+![Flow_Chart](https://github.com/Mecha-Coder/AI_Policy_Helper/blob/main/documentation/Flow%20Chart.png)
 
 ---
 
